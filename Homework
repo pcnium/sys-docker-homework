@@ -1,0 +1,250 @@
+# Домашнее задание к занятию "`Docker. Часть 2`" - `Лаптев сергей`
+
+
+### Инструкция по выполнению домашнего задания
+
+   1. Сделайте `fork` данного репозитория к себе в Github и переименуйте его по названию или номеру занятия, например, https://github.com/имя-вашего-репозитория/git-hw или  https://github.com/имя-вашего-репозитория/7-1-ansible-hw).
+   2. Выполните клонирование данного репозитория к себе на ПК с помощью команды `git clone`.
+   3. Выполните домашнее задание и заполните у себя локально этот файл README.md:
+      - впишите вверху название занятия и вашу фамилию и имя
+      - в каждом задании добавьте решение в требуемом виде (текст/код/скриншоты/ссылка)
+      - для корректного добавления скриншотов воспользуйтесь [инструкцией "Как вставить скриншот в шаблон с решением](https://github.com/netology-code/sys-pattern-homework/blob/main/screen-instruction.md)
+      - при оформлении используйте возможности языка разметки md (коротко об этом можно посмотреть в [инструкции  по MarkDown](https://github.com/netology-code/sys-pattern-homework/blob/main/md-instruction.md))
+   4. После завершения работы над домашним заданием сделайте коммит (`git commit -m "comment"`) и отправьте его на Github (`git push origin`);
+   5. Для проверки домашнего задания преподавателем в личном кабинете прикрепите и отправьте ссылку на решение в виде md-файла в вашем Github.
+   6. Любые вопросы по выполнению заданий спрашивайте в чате учебной группы и/или в разделе “Вопросы по заданию” в личном кабинете.
+   
+Желаем успехов в выполнении домашнего задания!
+   
+### Дополнительные материалы, которые могут быть полезны для выполнения задания
+
+1. [Руководство по оформлению Markdown файлов](https://gist.github.com/Jekins/2bf2d0638163f1294637#Code)
+
+---
+
+### Задание 1
+Напишите ответ в свободной форме, не больше одного абзаца текста.
+
+Установите Docker Compose и опишите, для чего он нужен и как может улучшить вашу жизнь.
+
+Решение
+`Докер компос используется для управления одним или несколькими контейнерами, тоесть не нужно будет много команд для запуска контейнеров, а достаточно одно докер компос ямл файла. Докер позволяет автоматизировать работу, не вводя длинные и сложные команды, достаточно настроить один файл композа и всё будет работать
+`
+
+### Задание 2
+Выполните действия и приложите текст конфига на этом этапе.
+
+Создайте файл docker-compose.yml и внесите туда первичные настройки:
+
+    version;
+    services;
+    volumes;
+    networks.
+
+При выполнении задания используйте подсеть 10.5.0.0/16. Ваша подсеть должна называться: <ваши фамилия и инициалы>-my-netology-hw. Все приложения из последующих заданий должны находиться в этой конфигурации.
+
+```
+Решение
+....version: '3'
+services:
+  netology-app:
+volumes:
+  netology-less:
+networks:
+  pcnium-hw:
+    - subnet: 10.5.0.0/16
+....
+
+### Задание 3
+Выполните действия:
+
+    Создайте конфигурацию docker-compose для Prometheus с именем контейнера <ваши фамилия и инициалы>-netology-prometheus.
+    Добавьте необходимые тома с данными и конфигурацией (конфигурация лежит в репозитории в директории 6-04/prometheus).
+    Обеспечьте внешний доступ к порту 9090 c докер-сервера.
+
+
+version: '3'
+
+networks:
+  pcnium-hw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+
+volumes:
+  prometheus_data: {}
+
+services:
+
+  pcnium-prometheus:
+    image: prom/prometheus:v2.47.2
+    container_name: pcnium-prometheus
+    volumes:
+       - ./prometheus/:/etc/prometheus/
+       - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraties'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention=200h'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      - pcnium-hw
+    labels:
+      org.labels-schema.group: "monitoring"
+
+
+
+
+### Задание 4
+Выполните действия:
+
+    Создайте конфигурацию docker-compose для Pushgateway с именем контейнера <ваши фамилия и инициалы>-netology-pushgateway.
+    Обеспечьте внешний доступ к порту 9091 c докер-сервера.
+
+  pushgateway:
+    image: prom/pushgateway:v1.6.2
+    container_name: pcnium-pushgateway
+    ports:
+      - 9091:9091
+    networks:
+      - pcnium-hw
+    depends_on:
+      - pcnium-prometheus
+    restart: unless-stopped
+
+
+### Задание 5
+
+Выполните действия:
+
+    Создайте конфигурацию docker-compose для Grafana с именем контейнера <ваши фамилия и инициалы>-netology-grafana.
+    Добавьте необходимые тома с данными и конфигурацией (конфигурация лежит в репозитории в директории 6-04/grafana).
+    Добавьте переменную окружения с путем до файла с кастомными настройками (должен быть в томе), в самом файле пропишите логин=<ваши фамилия и инициалы> пароль=netology.
+    Обеспечьте внешний доступ к порту 3000 c порта 80 докер-сервера.
+
+  grafana:
+    image: grafana/grafana
+    container_name: pcnium-grafana
+    #environment:
+     # GF_PATHS_CONFIG: /etc/grafana/custom.ini
+    ports:
+      - 3000:3000
+    #volumes:
+      #- /opt/docker/grafana:/etc/grafana
+      #- grafana-data:/var/lib/grafana
+    networks:
+      - pcnium-hw
+    depends_on:
+      - pcnium-prometheus
+    restart: unless-stopped
+
+
+### Задание 6
+Выполните действия.
+
+    Настройте поочередность запуска контейнеров.
+    Настройте режимы перезапуска для контейнеров.
+    Настройте использование контейнерами одной сети.
+    Запустите сценарий в detached режиме.
+
+### Задание 7
+Выполните действия.
+
+    Выполните запрос в Pushgateway для помещения метрики <ваши фамилия и инициалы> со значением 5 в Prometheus: echo "<ваши фамилия и инициалы> 5" | curl --data-binary @- http://localhost:<внешний порт выбранный вами в задании 4>/metrics/job/netology.
+    Залогиньтесь в Grafana с помощью логина и пароля из предыдущего задания.
+    Cоздайте Data Source Prometheus (Home -> Connections -> Data sources -> Add data source -> Prometheus -> указать "Prometheus server URL = http://prometheus:9090" -> Save & Test).
+    Создайте график на основе добавленной в пункте 5 метрики (Build a dashboard -> Add visualization -> Prometheus -> Select metric -> Metric explorer -> <ваши фамилия и инициалы -> Apply.
+
+В качестве решения приложите:
+
+    docker-compose.yml целиком;
+    скриншот команды docker ps после запуске docker-compose.yml;
+    скриншот графика, постоенного на основе вашей метрики.
+
+
+[Uplversion: '3.5'
+
+networks:
+  pcnium-hw:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+
+volumes:
+  prometheus_data:
+  grafana-data:
+
+services:
+
+  pcnium-prometheus:
+    image: prom/prometheus:v2.47.2
+    container_name: pcnium-prometheus
+    #volumes:
+     #  - /opt/docker/prometheus/:/etc/prometheus/
+      # - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraties'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention=200h'
+      - '--web.enable-lifecycle'
+    ports:
+      - 9090:9090
+    restart: always
+    networks:
+      - pcnium-hw
+    labels:
+      org.labels-schema.group: "monitoring"
+
+  pushgateway:
+    image: prom/pushgateway:v1.6.2
+    container_name: pcnium-pushgateway
+    ports:
+      - 9091:9091
+    networks:
+      - pcnium-hw
+    depends_on:
+      - pcnium-prometheus
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: pcnium-grafana
+    #environment:
+     # GF_PATHS_CONFIG: /etc/grafana/custom.ini
+    ports:
+      - 3000:3000
+    #volumes:
+      #- /opt/docker/grafana:/etc/grafana
+      #- grafana-data:/var/lib/grafana
+    networks:
+      - pcnium-hw
+    depends_on:
+      - pcnium-prometheus
+    restart: unless-stopped
+oading docker-compose.yml…]()
+
+![image](https://github.com/pcnium/sys-docker-homework/assets/163280954/d55edc63-c269-40e4-878a-49c6760a750c)
+
+Скриншот графиков на основе метрики прикрепить не смоу, не работает, а компос запускается только без дерикторий
+
+![image](https://github.com/pcnium/sys-docker-homework/assets/163280954/2ebd12c1-c055-448f-a1ab-a78304530b10)
+
+
+
+....
+....
+....
+....
+```
+
+`При необходимости прикрепитe сюда скриншоты
+![Название скриншота](ссылка на скриншот)`
