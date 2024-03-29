@@ -131,13 +131,13 @@ services:
   grafana:
     image: grafana/grafana
     container_name: pcnium-grafana
-    #environment:
-     # GF_PATHS_CONFIG: /etc/grafana/custom.ini
+    environment:
+      GF_PATHS_CONFIG: /etc/grafana/custom.ini
     ports:
       - 3000:3000
-    #volumes:
-      #- /opt/docker/grafana:/etc/grafana
-      #- grafana-data:/var/lib/grafana
+    volumes:
+      - /opt/docker/grafana:/etc/grafana
+      - grafana-data:/var/lib/grafana
     networks:
       - pcnium-hw
     depends_on:
@@ -186,9 +186,9 @@ services:
   pcnium-prometheus:
     image: prom/prometheus:v2.47.2
     container_name: pcnium-prometheus
-    #volumes:
-     #  - /opt/docker/prometheus/:/etc/prometheus/
-      # - prometheus_data:/prometheus
+    volumes:
+       - /opt/docker/prometheus/:/etc/prometheus/
+       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -218,13 +218,13 @@ services:
   grafana:
     image: grafana/grafana
     container_name: pcnium-grafana
-    #environment:
-     # GF_PATHS_CONFIG: /etc/grafana/custom.ini
+    environment:
+      GF_PATHS_CONFIG: /etc/grafana/custom.ini
     ports:
       - 3000:3000
-    #volumes:
-      #- /opt/docker/grafana:/etc/grafana
-      #- grafana-data:/var/lib/grafana
+    volumes:
+      - /opt/docker/grafana:/etc/grafana
+      - grafana-data:/var/lib/grafana
     networks:
       - pcnium-hw
     depends_on:
@@ -234,7 +234,8 @@ oading docker-compose.yml…]()
 
 ![image](https://github.com/pcnium/sys-docker-homework/assets/163280954/d55edc63-c269-40e4-878a-49c6760a750c)
 
-Скриншот графиков на основе метрики прикрепить не смоу, не работает, а компос запускается только без дерикторий
+график на основе метрики
+
 
 ![image](https://github.com/pcnium/sys-docker-homework/assets/163280954/2ebd12c1-c055-448f-a1ab-a78304530b10)
 
